@@ -66,6 +66,13 @@ tab_anket, tab_admin = st.tabs(["📝 Anket Formu", "🛠️ Admin Paneli"])
 # 📝 ANKET SEKME
 # ======================
 with tab_anket:
+    # 🔐 Katılım kimliği (maks 2 kez doldurabilsin)
+    st.header("🧾 Katılım Bilgisi")
+    kimlik = st.text_input(
+        "Lütfen e-posta adresiniz, öğrenci numaranız veya unutmayacağınız bir rumuz girin.\n"
+        "Bu bilgi, aynı kişinin en fazla 2 kez katılım yapabilmesi için kullanılacaktır."
+    )
+
     st.header("👤 Katılımcı Bilgileri")
 
     col1, col2 = st.columns(2)
@@ -104,7 +111,6 @@ with tab_anket:
 
     # ======================
     # 🔢 TEKNOSTRES SORULARI (12 MADDELİ DİNAMİK LİSTE)
-    # Buraya yeni sorular ekleyebilir / çıkarabilirsin; sadece listeyi düzenlemen yeterli.
     # ======================
     sorular = [
         ("S1", "Bildirimlerin sizi ne ölçüde etkilediğini düşünüyorsunuz?"),
@@ -129,6 +135,22 @@ with tab_anket:
     ortalama = sum(cevap_listesi) / len(cevap_listesi)
 
     if st.button("🎯 Sonucu Göster ve Kaydet"):
+
+        # 🔐 Kimlik alanı boş mu?
+        if not kimlik:
+            st.error("Lütfen e-posta / numara / rumuz alanını doldurun. Bu alan, katılım sınırını takip etmek için gereklidir.")
+            st.stop()
+
+        # 🔁 Aynı kimlikle en fazla 2 kez katılım kontrolü
+        max_katilim = 2
+        if os.path.exists("veriler.csv"):
+            df_existing = pd.read_csv("veriler.csv")
+            if "Kimlik" in df_existing.columns:
+                onceki_sayi = (df_existing["Kimlik"] == kimlik).sum()
+                if onceki_sayi >= max_katilim:
+                    st.error(f"Bu kimlik ile zaten {max_katilim} kez katılım yapmışsınız. Daha fazla cevap veremezsiniz.")
+                    st.stop()
+
         # Teknostres düzeyi sınıflandırma
         if ortalama < 2.5:
             düzey = "Düşük"
@@ -148,6 +170,7 @@ with tab_anket:
         # 🔹 Verileri CSV'ye kaydet
         data = {
             "Tarih": [tarih],
+            "Kimlik": [kimlik],
             "Cinsiyet": [cinsiyet],
             "Yaş": [yas],
             "Bölüm": [bolum],
@@ -168,7 +191,6 @@ with tab_anket:
         df_new = pd.DataFrame(data)
 
         if os.path.exists("veriler.csv"):
-            df_existing = pd.read_csv("veriler.csv")
             df_all = pd.concat([df_existing, df_new], ignore_index=True)
             df_all.to_csv("veriler.csv", index=False)
         else:
