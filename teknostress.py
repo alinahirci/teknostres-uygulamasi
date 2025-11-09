@@ -9,7 +9,7 @@ import hashlib
 st.set_page_config(page_title="Teknostres Ölçeği", page_icon="📱", layout="wide")
 
 # max izin verilen katılım (aynı kimlik ile)
-MAX_KATILIM = 2
+MAX_KATILIM = 1
 
 # session state
 if "email_verified" not in st.session_state:
@@ -39,7 +39,7 @@ with tab_anket:
     st.header("🧾 Katılım Bilgisi")
     kimlik = st.text_input(
         "Lütfen e-posta adresiniz, öğrenci numaranız veya unutmayacağınız bir rumuz girin.\n"
-        "Bu bilgi, aynı kişinin en fazla 2 kez katılım yapabilmesi için kullanılacaktır."
+        "Bu bilgi, aynı kişinin en fazla 1 kez katılım yapabilmesi için kullanılacaktır."
     )
 
     st.header("👤 Katılımcı Bilgileri")
@@ -198,3 +198,4 @@ with tab_admin:
             st.warning("Henüz 'veriler.csv' dosyası oluşturulmadı.")
     elif admin_sifre != "":
         st.error("❌ Hatalı şifre. Yetkisiz erişim.")
+
